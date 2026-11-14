@@ -32,7 +32,7 @@ function makeTextures(aniso){
     g.fillStyle = '#3c3831'; g.fillRect(0, 0, w, h);
     for (let n = 0; n < 1500; n++){
       const cx = R() * w, cy = R() * h, rx = 20 + R() * 34, ry = 15 + R() * 22, a = (R() - 0.5) * 0.7;
-      const s = 140 + R() * 70, warm = R() * 18;
+      const s = 112 + R() * 70, warm = R() * 18;
       const col = `rgb(${s + warm | 0},${s + warm * 0.55 | 0},${s - 10 - warm * 0.8 | 0})`;
       for (const dx of [-w, 0, w]) for (const dy of [-h, 0, h]){
         if (cx + dx < -80 || cx + dx > w + 80 || cy + dy < -80 || cy + dy > h + 80) continue;
@@ -64,13 +64,20 @@ function makeTextures(aniso){
     g.fillStyle = 'rgba(255,255,255,.07)'; g.fillRect(0, 0, w, 14);
   }, { aniso });
 
+  const latticeD = canvasTex(256, 128, (g, w, h) => {
+    g.fillStyle = '#121416'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = '#55554f'; g.lineWidth = 3;
+    for (let x = 0; x <= w; x += 32){ g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
+    for (let y = 0; y <= h; y += 32){ g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+  }, { aniso });
+
   const slat = canvasTex(128, 128, (g, w, h) => {
     g.fillStyle = '#2a2724'; g.fillRect(0, 0, w, h);
     for (let y = 0; y < h; y += 8){ g.fillStyle = '#4a443d'; g.fillRect(0, y, w, 3); g.fillStyle = '#0d0c0b'; g.fillRect(0, y + 5, w, 3); }
   }, { aniso });
 
   const tile = canvasTex(512, 512, (g, w, h) => {
-    g.fillStyle = "#8a847a"; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#9a948a'; g.fillRect(0, 0, w, h);
     for (let row = 0; row < 8; row++){
       const y = row * 64;
       for (let x = 0; x < w; x += 51.2){
@@ -79,7 +86,7 @@ function makeTextures(aniso){
         g.fillStyle = 'rgba(255,255,255,.14)'; g.fillRect(x + 4, y + 3, 5, 56);
         g.fillStyle = 'rgba(25,22,20,.55)'; g.fillRect(x + 42, y + 3, 6, 56);
       }
-      g.fillStyle = 'rgba(25,22,20,.6)'; g.fillRect(0, y + 58, w, 6);
+      g.fillStyle = 'rgba(70,64,58,.55)'; g.fillRect(0, y + 58, w, 3); g.fillStyle = 'rgba(232,226,212,.75)'; g.fillRect(0, y + 61, w, 3);
     }
   }, { aniso });
 
@@ -88,12 +95,13 @@ function makeTextures(aniso){
     g.fillStyle = 'rgba(120,100,70,.08)';
     for (let i = 0; i < 200; i++) g.fillRect(R() * w, R() * h, 20, 2);
     g.fillStyle = '#2a2420'; g.fillRect(0, h - 26, w, 26);
-    g.fillRect(w / 2 - 7, 0, 14, h);
+    g.fillStyle = '#17130f'; g.beginPath(); g.moveTo(w * 0.5, h * 0.46); g.lineTo(w * 0.1, h * 0.96); g.lineTo(w * 0.9, h * 0.96); g.closePath(); g.fill();
+    g.fillStyle = '#2a2420';
     g.strokeStyle = '#2a2420'; g.lineWidth = 10;
-    g.beginPath(); g.arc(w / 2, h * 0.58, 46, 0, 6.2832); g.stroke();
-    g.fillStyle = '#b5452f'; g.beginPath(); g.arc(w / 2, h * 0.58, 22, 0, 6.2832); g.fill();
+    g.beginPath(); g.arc(w / 2, h * 0.3, 34, 0, 6.2832); g.stroke();
+    g.fillStyle = '#b5452f'; g.beginPath(); g.arc(w / 2, h * 0.3, 15, 0, 6.2832); g.fill();
     g.strokeStyle = '#2a2420'; g.lineWidth = 6;
-    for (let k = 0; k < 8; k++){ const a = k * Math.PI / 4; g.beginPath(); g.moveTo(w / 2 + Math.cos(a) * 52, h * 0.58 + Math.sin(a) * 52); g.lineTo(w / 2 + Math.cos(a) * 70, h * 0.58 + Math.sin(a) * 70); g.stroke(); }
+    for (let k = 0; k < 8; k++){ const a = k * Math.PI / 4; g.beginPath(); g.moveTo(w / 2 + Math.cos(a) * 40, h * 0.3 + Math.sin(a) * 40); g.lineTo(w / 2 + Math.cos(a) * 54, h * 0.3 + Math.sin(a) * 54); g.stroke(); }
   }, { aniso });
 
   const sand = canvasTex(512, 512, (g, w, h) => {
@@ -106,7 +114,7 @@ function makeTextures(aniso){
     for (let y = 0; y < h; y += 32){ g.fillStyle = '#3a2c20'; g.fillRect(0, y, w, 3); g.fillStyle = 'rgba(255,255,255,.05)'; g.fillRect(0, y + 3, w, 2); }
   }, { aniso });
 
-  return { stone, boards, lattice, slat, tile, gable, sand, wood };
+  return { stone, boards, lattice, latticeD, slat, tile, gable, sand, wood };
 }
 
 // ------------------------------------------------------------------ small helpers
@@ -152,6 +160,9 @@ export function buildCastle({ aniso = 8 } = {}){
     gold: new THREE.MeshStandardMaterial({ color: 0xb59a52, roughness: 0.4, metalness: 0.55 }),
     iron: new THREE.MeshStandardMaterial({ color: 0x3b3a39, roughness: 0.6, metalness: 0.5 }),
     gableFace: new THREE.MeshStandardMaterial({ map: T.gable, roughness: 0.9 }),
+    awn: new THREE.MeshStandardMaterial({ color: 0x3b3835, roughness: 0.7 }),
+    frameD: new THREE.MeshStandardMaterial({ color: 0x0e0c0b, roughness: 0.9 }),
+    winDark: (cols, rows) => new THREE.MeshStandardMaterial({ map: repeated(T.latticeD, cols / 8, rows / 4), roughness: 0.5 }),
     win: (cols, rows) => new THREE.MeshStandardMaterial({ map: repeated(T.lattice, cols / 8, rows / 4), roughness: 0.35, metalness: 0.2 }),
     slatM: (cols, rows) => new THREE.MeshStandardMaterial({ map: repeated(T.slat, cols, rows), roughness: 0.9 }),
     wall: (w, h) => new THREE.MeshStandardMaterial({ map: repeated(T.boards, w / 6, h / 4), roughness: 0.78 }),
@@ -206,7 +217,7 @@ export function buildCastle({ aniso = 8 } = {}){
   }
 
   // -------------------------------------------------------------- hip / pent roof from one rectangle to another
-  function roofGroup({ ex, ez, tx, tz, y0, h, lift = 0.95, fascia = 0.5, pow = 1.5 }){
+  function roofGroup({ ex, ez, tx, tz, y0, h, lift = 0.95, fascia = 0.42, pow = 1.5 }){
     const g = new THREE.Group();
     const N = 7, Mx = 12;
     const sides = [
@@ -328,23 +339,24 @@ export function buildCastle({ aniso = 8 } = {}){
   }
 
   // -------------------------------------------------------------- windows and awnings
-  function windowsOn(g, { n, ww, wh, y, gap, kind = 'lattice' }){
+  // On the real keep the walls are black boards with dark windows; a long dark louvred awning
+  // shades each row of them. Only the watch floor has light window frames.
+  function windowsOn(g, { n, ww, wh, y, gap, light = false, awn = true }){
     const total = n * ww + (n - 1) * gap;
     for (let i = 0; i < n; i++){
       const x = -total / 2 + ww / 2 + i * (ww + gap);
-      const frame = box(ww + 0.28, wh + 0.28, 0.1, M.creamD, x, y, 0.04); g.add(frame);
-      const mat = kind === 'slat' ? M.slatM(ww * 2, wh * 2) : M.win(Math.round(ww * 1.6), Math.round(wh * 1.6));
-      const pane = new THREE.Mesh(new THREE.PlaneGeometry(ww, wh), mat);
+      g.add(box(ww + 0.22, wh + 0.22, 0.1, light ? M.creamD : M.frameD, x, y, 0.04));
+      const pane = new THREE.Mesh(new THREE.PlaneGeometry(ww, wh), light ? M.win(Math.round(ww * 1.6), Math.round(wh * 1.6)) : M.winDark(Math.round(ww * 1.2), Math.round(wh * 1.2)));
       pane.position.set(x, y, 0.1); g.add(pane);
     }
+    if (awn) awning(g, { x: 0, y: y + wh / 2 + 0.42, w: total + 1.2, d: 1.0, h: 0.55, mat: M.awn });
   }
-  function awning(g, { x, y, w, d = 1.15, h = 0.62 }){
+  function awning(g, { x, y, w, d = 1.15, h = 0.62, mat = M.awn }){
     const shape = new THREE.Shape();
     shape.moveTo(0, 0); shape.lineTo(d, -h); shape.lineTo(d, -h - 0.16); shape.lineTo(0, -0.18); shape.closePath();
     const geo = new THREE.ExtrudeGeometry(shape, { depth: w, bevelEnabled: false });
     geo.rotateY(-Math.PI / 2); geo.translate(w / 2, 0, 0);
-    const m = new THREE.Mesh(geo, M.tile); m.position.set(x, y, 0.02); m.castShadow = true; g.add(m);
-    const lip = box(w, 0.17, 0.18, M.cream, x, y - h - 0.08, d); g.add(lip);
+    const m = new THREE.Mesh(geo, mat); m.position.set(x, y, 0.02); m.castShadow = true; g.add(m);
   }
 
   // -------------------------------------------------------------- a tower of tiers
@@ -358,8 +370,8 @@ export function buildCastle({ aniso = 8 } = {}){
       const body = new THREE.Mesh(new THREE.BoxGeometry(t.w, t.h, t.d), wallMats);
       body.position.y = y + t.h / 2; body.castShadow = body.receiveShadow = true; g.add(body);
       // plaster plinth at the foot and a plaster band under the eaves
-      g.add(box(t.w + 0.2, 0.34, t.d + 0.2, M.cream, 0, y + 0.17, 0));
-      g.add(box(t.w + 0.12, 0.3, t.d + 0.12, M.creamD, 0, y + t.h - 0.15, 0));
+      const band = t.band ?? 1.7;
+      if (band > 0) g.add(box(t.w + 0.14, band, t.d + 0.14, M.cream, 0, y + t.h - band / 2, 0));
       // pent skirt around the foot / small eave ring part-way up (the hisashi)
       for (const sk of [t.skirt, t.eaves]){
         if (!sk) continue;
@@ -370,7 +382,7 @@ export function buildCastle({ aniso = 8 } = {}){
         if (!spec2 && t.winAll){
           const a = t.winAll, len = face[0] === 'z' ? t.w : t.d, edge = a.edge ?? 1.2;
           const n = Math.max(1, Math.floor((len - 2 * edge + a.gap) / (a.ww + a.gap)));
-          spec2 = { n, ww: a.ww, wh: a.wh, y: a.y, gap: a.gap };
+          spec2 = { n, ww: a.ww, wh: a.wh, y: a.y, gap: a.gap, light: !!a.light, awn: !a.light };
         }
         if (!spec2) continue;
         const fg = faceAt(face, t.w / 2, t.d / 2, 0); fg.position.y = y;
@@ -437,31 +449,31 @@ export function buildCastle({ aniso = 8 } = {}){
 
   // ================================================================== the Daitenshu (main keep)
   const dai = new THREE.Group();
-  const daiBase = stoneBlock({ cx: 0, cz: 0, hx: 11.6, hz: 10.0, y0: GROUND, y1: 0, inset: 3.0 });
+  const daiBase = stoneBlock({ cx: 0, cz: 0, hx: 10.9, hz: 9.2, y0: GROUND, y1: 0, inset: 3.2 });
   dai.add(daiBase);
   const daiTower = tower({
     tiers: [
       { // floors 1-2: the wide black body, with a pent skirt around its foot
-        w: 21.0, d: 17.6, h: 5.8, skirt: { y: 1.7, o: 1.6, rise: 0.9 },
-        winAll: { ww: 2.3, wh: 1.5, y: 3.6, gap: 0.5 },
-        roof: { o: 2.8, rise: 3.4, gables: [{ side: 'z+', x: -3.2, W: 9.2, rise: 3.5 }, { side: 'z-', x: 0, W: 9.2, rise: 3.5 }, { side: 'x-', x: 0, W: 7.6, rise: 3.1 }, { side: 'x+', x: 0, W: 7.6, rise: 3.1 }] },
+        w: 21.0, d: 17.6, h: 7.0, skirt: { y: 1.7, o: 1.6, rise: 0.9 },
+        winAll: { ww: 2.3, wh: 1.5, y: 3.4, gap: 0.5 },
+        roof: { o: 2.3, rise: 2.5, gables: [{ side: 'z+', x: -3.2, W: 10.4, rise: 2.9 }, { side: 'z-', x: 0, W: 10.4, rise: 2.9 }, { side: 'x-', x: 0, W: 8.4, rise: 2.6 }, { side: 'x+', x: 0, W: 8.4, rise: 2.6 }] },
       },
       { // floors 3-4, with its own small eave ring (the hisashi)
-        w: 15.2, d: 12.4, h: 4.8, eaves: { y: 2.0, o: 1.5, rise: 0.8 },
-        winAll: { ww: 2.1, wh: 1.3, y: 3.8, gap: 0.5 },
-        roof: { o: 2.5, rise: 2.8, gables: [{ side: 'z+', x: 0, W: 7.8, rise: 3.7 }, { side: 'z-', x: 0, W: 7.8, rise: 3.7 }, { side: 'x-', x: 0, W: 5.6, rise: 2.3, type: 'kara' }, { side: 'x+', x: 0, W: 5.6, rise: 2.3, type: 'kara' }] },
+        w: 15.2, d: 12.4, h: 5.8, eaves: { y: 3.7, o: 1.4, rise: 0.7 },
+        winAll: { ww: 2.1, wh: 1.2, y: 2.0, gap: 0.5 },
+        roof: { o: 2.0, rise: 2.0, gables: [{ side: 'z+', x: 0, W: 8.6, rise: 3.0 }, { side: 'z-', x: 0, W: 8.6, rise: 3.0 }, { side: 'x-', x: 0, W: 5.6, rise: 2.3, type: 'kara' }, { side: 'x+', x: 0, W: 5.6, rise: 2.3, type: 'kara' }] },
       },
       { // floor 5
-        w: 11.2, d: 9.2, h: 3.8, eaves: { y: 1.5, o: 1.2, rise: 0.7 },
-        winAll: { ww: 2.0, wh: 1.2, y: 2.9, gap: 0.55 },
-        roof: { o: 2.2, rise: 2.3, gables: [{ side: 'z+', x: 0, W: 5.2, rise: 2.1, type: 'kara' }, { side: 'z-', x: 0, W: 5.2, rise: 2.1, type: 'kara' }, { side: 'x-', x: 0, W: 4.6, rise: 2.0 }, { side: 'x+', x: 0, W: 4.6, rise: 2.0 }] },
+        w: 11.2, d: 9.2, h: 4.6, eaves: { y: 2.9, o: 1.2, rise: 0.6 },
+        winAll: { ww: 2.0, wh: 1.1, y: 1.6, gap: 0.55 },
+        roof: { o: 1.7, rise: 1.7, gables: [{ side: 'z+', x: 0, W: 5.2, rise: 2.1, type: 'kara' }, { side: 'z-', x: 0, W: 5.2, rise: 2.1, type: 'kara' }, { side: 'x-', x: 0, W: 4.6, rise: 2.0 }, { side: 'x+', x: 0, W: 4.6, rise: 2.0 }] },
       },
       { // floor 6: the watch floor, ringed by windows
-        w: 7.6, d: 6.6, h: 3.2,
-        winAll: { ww: 1.25, wh: 1.7, y: 1.7, gap: 0.3, edge: 0.7 },
+        w: 7.6, d: 6.6, h: 3.2, band: 0.5,
+        winAll: { ww: 1.25, wh: 1.7, y: 1.7, gap: 0.3, edge: 0.7, light: true },
       },
     ],
-    top: { o: 3.0, rise: 1.9, ring: [2.6, 2.9], gableRise: 2.7 },
+    top: { o: 2.4, rise: 1.9, ring: [2.6, 2.9], gableRise: 2.7 },
   });
   daiTower.position.y = 0;
   dai.add(daiTower);
@@ -523,8 +535,8 @@ export function buildCastle({ aniso = 8 } = {}){
         roof: { o: 1.9, rise: 1.8, gables: [{ side: 'z+', x: 0, W: 3.8, rise: 1.7 }] },
       },
       {
-        w: 5.0, d: 4.4, h: 2.8,
-        winAll: { ww: 1.0, wh: 1.4, y: 1.5, gap: 0.25, edge: 0.5 },
+        w: 5.0, d: 4.4, h: 2.8, band: 0.4,
+        winAll: { ww: 1.0, wh: 1.4, y: 1.5, gap: 0.25, edge: 0.5, light: true },
       },
     ],
     top: { o: 2.0, rise: 1.5, ring: [1.6, 1.7], gableRise: 2.0 },
