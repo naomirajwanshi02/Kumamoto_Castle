@@ -3,7 +3,7 @@
 //    walls in tiers, each with a tiled roof, white-plaster gables (chidori-hafu and kara-hafu)
 //    and a top floor ringed by windows under a hip-and-gable (irimoya) roof with shachihoko
 //  - the Shotenshu (small keep) to its right, joined by a low connecting hall
-//  - the entrance stair, fences and the wooden bridge to the right
+//  - the entrance stair and the wooden bridge to the right
 // Everything is drawn from procedural canvas textures, so there are no image files to load.
 
 import * as THREE from 'three';
@@ -573,28 +573,6 @@ export function buildCastle({ aniso = 8 } = {}){
     root.add(bridge);
   }
 
-  // ================================================================== fence in the foreground
-  {
-    const fence = new THREE.Group();
-    const post = new THREE.BoxGeometry(0.22, 1.5, 0.22);
-    for (const [xa, za, xb, zb] of [[-27, 17, -7.5, 19.4], [-7.5, 19.4, 19, 18.6]]){
-      const n = Math.round(Math.hypot(xb - xa, zb - za) / 2.2);
-      for (let i = 0; i <= n; i++){
-        const p = new THREE.Mesh(post, M.wood); p.position.set(lerp(xa, xb, i / n), GROUND + 0.75, lerp(za, zb, i / n)); p.castShadow = true; fence.add(p);
-      }
-      for (const yy of [0.55, 1.2]) fence.add(beam([xa, GROUND + yy, za], [xb, GROUND + yy, zb], 0.1, 0.12, M.wood));
-    }
-    root.add(fence);
-  }
-
-  // ================================================================== ground
-  const groundTex = T.sand.clone(); groundTex.repeat.set(14, 14); groundTex.needsUpdate = true;
-  const ground = new THREE.Mesh(new THREE.CircleGeometry(82, 72), new THREE.MeshStandardMaterial({
-    map: groundTex, roughness: 1, transparent: true,
-    alphaMap: canvasTex(256, 256, (g, w, h) => { const gr = g.createRadialGradient(w / 2, h / 2, w * 0.18, w / 2, h / 2, w / 2); gr.addColorStop(0, '#fff'); gr.addColorStop(0.62, '#fff'); gr.addColorStop(1, '#000'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }, { srgb: false }),
-  }));
-  ground.rotation.x = -Math.PI / 2; ground.position.set(20, GROUND - 0.02, 4); ground.receiveShadow = true;
-  root.add(ground);
 
   root.traverse((o) => { if (o.isMesh && !o.userData.noShadow){ o.castShadow = o.castShadow || false; } });
   root.userData.center = new THREE.Vector3(18, 2, 0);

@@ -6,7 +6,7 @@
 
 import { NOTES, NOTE_MS } from './data.js';
 import { scan, stopScan, scanning, plainCamera, freezeTracking } from './scan.js';
-import { mountStage, unmountStage, resetView } from './stage.js';
+import { mountStage, unmountStage } from './stage.js';
 
 const $ = (id) => document.getElementById(id);
 const q = new URLSearchParams(location.search);
@@ -139,8 +139,8 @@ $('permBtn').addEventListener('click', askCamera);
 $('scanRetry').addEventListener('click', () => { stopScan(); openScan(); });
 $('scanSkip').addEventListener('click', () => { stopScan(); overlay('guide', false); openIntro(); });
 $('goBtn').addEventListener('click', begin);
-$('homeBtn').addEventListener('click', resetView);
-$('closeBtn').addEventListener('click', () => { clearTimeout(S.noteT); unmountStage(); overlay('hud', false); stopScan(); openScan(); });
+$('infoBtn').addEventListener('click', () => setInfo($('notes').hidden));
+$('notesClose').addEventListener('click', () => setInfo(false));
 $('errBtn').addEventListener('click', () => { $('err').hidden = true; location.reload(); });
 
 // MindAR's own listeners can throw after a failed camera start; the screen already says what to do.
@@ -153,3 +153,17 @@ window.__kumamoto = { S, goNote, begin };
 if (q.has('preview')){ $('ar').classList.add('preview'); openIntro(); }
 else if (q.has('demo')) openIntro();
 else openPerm();
+
+// ------------------------------------------------------------ information panel: the i button shows / hides it, the small cross hides it
+function setInfo(on){
+  $('notes').hidden = !on;
+  $('infoBtn').setAttribute('aria-expanded', String(on));
+  clearTimeout(S.noteT);
+  if (on){ pop($('notes')); goNote(S.note); }
+}
+
+// keep the last two words of every paragraph together, so no line ends with a lone word
+function glue(el){ el.innerHTML = el.innerHTML.replace(/\s+(\S+)\s*$/, '&nbsp;$1'); }
+document.querySelectorAll('.welcome p').forEach(glue);
+new MutationObserver(() => document.querySelectorAll('.note p:not([data-g])').forEach((p) => { p.dataset.g = 1; glue(p); }))
+  .observe($('noteTrack'), { childList: true });

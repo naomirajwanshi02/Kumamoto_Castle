@@ -81,7 +81,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
    Every paragraph runs the full width of the panel, with the same padding on both sides. */
 .welcome{padding:30px var(--pad) 26px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:stretch}
 .welcome h1{margin:0;font-size:clamp(28px,8.5vw,36px);line-height:1.05;font-weight:900;color:var(--anatomy-strong)}
-.welcome p{margin:0;width:100%;max-width:none;font-size:16px;line-height:1.5;text-align:justify;text-align-last:left;hyphens:auto;-webkit-hyphens:auto}
+.welcome p{margin:0;width:100%;max-width:none;font-size:16px;line-height:1.5;text-align:left;hyphens:none;-webkit-hyphens:none;text-wrap:pretty}
 .hero{display:block;width:100%;height:auto;max-height:30vh;object-fit:contain;margin:0 auto;border-radius:8px}
 .steps{list-style:none;margin:2px 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left;width:100%}
 .steps li{display:flex;gap:10px;align-items:center;background:var(--anatomy-shade-3);border-radius:10px;padding:10px 12px;font-size:15px;line-height:1.25;box-shadow:inset 0 0 0 1px var(--anatomy-faint)}
@@ -105,7 +105,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .note{flex:0 0 100%;padding:14px var(--pad) 2px;position:relative}
 .note h2{margin:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:22px;line-height:1.1;font-weight:900;color:var(--anatomy-strong)}
 .note h2 small{color:var(--anatomy-red);font-weight:700;font-size:15px}
-.note p{margin:6px 0 0;width:100%;font-size:15px;line-height:1.42;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+.note p{margin:6px 0 0;width:100%;font-size:15px;line-height:1.42;text-align:left;hyphens:none;-webkit-hyphens:none;text-wrap:pretty}
 .note-foot{display:flex;align-items:center;justify-content:center;padding:0 14px 8px}
 .dots{display:flex;gap:6px}
 .dots button{width:22px;height:22px;border:0;padding:0;background:none;display:grid;place-items:center}
@@ -133,3 +133,11 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   :root{--pad:28px}
 }
 @media (min-width:1100px){.col{max-width:640px}}
+
+/* information panel: the small cross is inside the panel; the i button sits beside it */
+.notes[hidden]{display:none}
+.notes .x{position:absolute;top:8px;right:8px;z-index:2;width:28px;height:28px;border:0;border-radius:50%;background:var(--anatomy-shade-2);color:var(--anatomy-strong);display:grid;place-items:center;padding:0}
+.notes .x:active{transform:scale(.92)}
+.note h2{padding-right:30px}
+.hud-top{justify-content:flex-end}
+.note p,.note h2,.welcome p,.steps li > span{overflow-wrap:normal;word-break:normal}

@@ -38,7 +38,7 @@ export function mountStage(container){
   const fill = new THREE.DirectionalLight(0xbcd0e8, 0.55); fill.position.set(-60, 30, -40); scene.add(fill);
 
   const castle = buildCastle({ aniso: Math.min(8, renderer.capabilities.getMaxAnisotropy()) });
-  castle.traverse((o) => { if (o.isMesh){ o.castShadow = o !== castle.children[castle.children.length - 1]; o.receiveShadow = true; } });
+  castle.traverse((o) => { if (o.isMesh){ o.castShadow = true; o.receiveShadow = true; } });
   scene.add(castle);
   const target = castle.userData.center.clone();
 
@@ -51,9 +51,6 @@ export function mountStage(container){
     S.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     st.drag = true; st.idle = 0; st.vAz = st.vEl = 0;
     if (S.pointers.size === 2){ const [a, b] = [...S.pointers.values()]; S.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), dist: st.dist }; }
-    const now = performance.now();
-    if (S.pointers.size === 1 && now - S.lastTap < 320) reset();
-    if (S.pointers.size === 1) S.lastTap = now;
   });
   on(cv, 'pointermove', (e) => {
     const p = S.pointers.get(e.pointerId); if (!p) return;

@@ -71,7 +71,7 @@
       <ol class="steps">
         <li><b>1</b><span><u>Turn:</u> drag one finger</span></li>
         <li><b>2</b><span><u>Zoom:</u> pinch two fingers</span></li>
-        <li><b>3</b><span><u>Reset:</u> double-tap</span></li>
+        <li><b>3</b><span><u>Look:</u> from every side</span></li>
         <li><b>4</b><span><u>Read:</u> swipe the top panel</span></li>
       </ol>
       <p>Keep your <b>camera on</b>: the castle stands over the live view around you. This is an AR experience, so it needs <b>permission to use your camera</b>. The video stays on this phone and nothing is recorded or sent anywhere.</p>
@@ -85,13 +85,11 @@
 <div id="hud" class="overlay">
   <div class="hud-top">
     <div class="plate notes" id="notes" aria-roledescription="carousel" aria-live="polite">
+      <button class="x" id="notesClose" aria-label="Close the information"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></button>
       <div class="track" id="noteTrack"></div>
       <div class="note-foot"><div class="dots" id="noteDots" role="tablist" aria-label="Notes"></div></div>
     </div>
-    <div class="iconcol">
-      <button class="iconbtn" id="closeBtn" aria-label="Back to scanning"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
-      <button class="iconbtn" id="homeBtn" aria-label="Reset the view"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 11.5L12 5l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></button>
-    </div>
+    <button class="iconbtn" id="infoBtn" aria-label="Show or hide the information" aria-expanded="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="6.2" r="1.9" fill="currentColor"/><path d="M12 10.5v8" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg></button>
   </div>
   <div class="hud-bottom">
     <div class="hint" id="hint" role="status">Drag to turn · Pinch to zoom</div>
