@@ -32,7 +32,7 @@ function makeTextures(aniso){
     g.fillStyle = '#3c3831'; g.fillRect(0, 0, w, h);
     for (let n = 0; n < 1500; n++){
       const cx = R() * w, cy = R() * h, rx = 20 + R() * 34, ry = 15 + R() * 22, a = (R() - 0.5) * 0.7;
-      const s = 112 + R() * 78, warm = R() * 18;
+      const s = 140 + R() * 70, warm = R() * 18;
       const col = `rgb(${s + warm | 0},${s + warm * 0.55 | 0},${s - 10 - warm * 0.8 | 0})`;
       for (const dx of [-w, 0, w]) for (const dy of [-h, 0, h]){
         if (cx + dx < -80 || cx + dx > w + 80 || cy + dy < -80 || cy + dy > h + 80) continue;
@@ -70,11 +70,11 @@ function makeTextures(aniso){
   }, { aniso });
 
   const tile = canvasTex(512, 512, (g, w, h) => {
-    g.fillStyle = '#76716a'; g.fillRect(0, 0, w, h);
+    g.fillStyle = "#8a847a"; g.fillRect(0, 0, w, h);
     for (let row = 0; row < 8; row++){
       const y = row * 64;
       for (let x = 0; x < w; x += 51.2){
-        const v = 100 + R() * 26;
+        const v = 118 + R() * 26;
         g.fillStyle = `rgb(${v},${v - 4},${v - 10})`; g.fillRect(x + 4, y + 3, 44, 56);
         g.fillStyle = 'rgba(255,255,255,.14)'; g.fillRect(x + 4, y + 3, 5, 56);
         g.fillStyle = 'rgba(25,22,20,.55)'; g.fillRect(x + 42, y + 3, 6, 56);
@@ -143,7 +143,7 @@ export function buildCastle({ aniso = 8 } = {}){
   const M = {
     stone: new THREE.MeshStandardMaterial({ map: T.stone, bumpMap: T.stone, bumpScale: 2.2, roughness: 0.95 }),
     cap: new THREE.MeshStandardMaterial({ color: 0x8a806f, roughness: 1 }),
-    tile: new THREE.MeshStandardMaterial({ map: T.tile, roughness: 0.62, metalness: 0.08, side: THREE.DoubleSide }),
+    tile: new THREE.MeshStandardMaterial({ map: T.tile, roughness: 0.8, metalness: 0, side: THREE.DoubleSide }),
     cream: new THREE.MeshStandardMaterial({ color: 0xeee6d2, roughness: 0.85 }),
     creamD: new THREE.MeshStandardMaterial({ color: 0xcfc6ad, roughness: 0.9 }),
     dark: new THREE.MeshStandardMaterial({ color: 0x1a1613, roughness: 0.9 }),
@@ -159,7 +159,7 @@ export function buildCastle({ aniso = 8 } = {}){
 
   const root = new THREE.Group();
   root.name = 'kumamoto-castle';
-  const GROUND = -14;
+  const GROUND = -11.2;
 
   // -------------------------------------------------------------- stone base (musha-gaeshi)
   const stoneOff = (t, inset) => inset * Math.pow(t, 2.2); // t = 0 at the top, 1 at the foot
@@ -206,7 +206,7 @@ export function buildCastle({ aniso = 8 } = {}){
   }
 
   // -------------------------------------------------------------- hip / pent roof from one rectangle to another
-  function roofGroup({ ex, ez, tx, tz, y0, h, lift = 0.55, fascia = 0.5, pow = 1.35 }){
+  function roofGroup({ ex, ez, tx, tz, y0, h, lift = 0.95, fascia = 0.5, pow = 1.5 }){
     const g = new THREE.Group();
     const N = 7, Mx = 12;
     const sides = [
@@ -258,7 +258,7 @@ export function buildCastle({ aniso = 8 } = {}){
     fg.setAttribute('position', new THREE.Float32BufferAttribute(fpos, 3));
     fg.setIndex(fidx); fg.computeVertexNormals();
     const fm = new THREE.Mesh(fg, new THREE.MeshStandardMaterial({ color: 0xece3cf, roughness: 0.85, side: THREE.DoubleSide }));
-    fm.castShadow = true; g.add(fm);
+    g.add(fm);
     // soffit under the eave
     const soff = box(ex * 2, 0.25, ez * 2, M.wood, 0, y0 - 0.1, 0); g.add(soff);
     // hip ridges
@@ -275,7 +275,7 @@ export function buildCastle({ aniso = 8 } = {}){
     tri: [[0, 1], [1, 0]],
     kara: [[0, 1], [0.12, 0.97], [0.25, 0.88], [0.4, 0.68], [0.55, 0.5], [0.7, 0.37], [0.82, 0.32], [0.92, 0.36], [1, 0.48]],
   };
-  function gable({ W, rise, depth, roofH = 0, roofRun = 1, type = 'tri', o = 0.75, pow = 1.35, flat = false }){
+  function gable({ W, rise, depth, roofH = 0, roofRun = 1, type = 'tri', o = 0.75, pow = 1.5, flat = false }){
     const g = new THREE.Group();
     const half = [...PROFILES[type]];
     const L = half.slice().reverse().map(([u, v]) => [-u * W / 2, v * rise]);
@@ -360,8 +360,18 @@ export function buildCastle({ aniso = 8 } = {}){
       // plaster plinth at the foot and a plaster band under the eaves
       g.add(box(t.w + 0.2, 0.34, t.d + 0.2, M.cream, 0, y + 0.17, 0));
       g.add(box(t.w + 0.12, 0.3, t.d + 0.12, M.creamD, 0, y + t.h - 0.15, 0));
+      // pent skirt around the foot / small eave ring part-way up (the hisashi)
+      for (const sk of [t.skirt, t.eaves]){
+        if (!sk) continue;
+        g.add(roofGroup({ ex: t.w / 2 + sk.o, ez: t.d / 2 + sk.o, tx: t.w / 2 + 0.04, tz: t.d / 2 + 0.04, y0: y + sk.y, h: sk.rise, lift: 0.5, fascia: 0.38, pow: 1.1 }));
+      }
       for (const face of ['z+', 'z-', 'x+', 'x-']){
-        const spec2 = t.win?.[face];
+        let spec2 = t.win?.[face];
+        if (!spec2 && t.winAll){
+          const a = t.winAll, len = face[0] === 'z' ? t.w : t.d, edge = a.edge ?? 1.2;
+          const n = Math.max(1, Math.floor((len - 2 * edge + a.gap) / (a.ww + a.gap)));
+          spec2 = { n, ww: a.ww, wh: a.wh, y: a.y, gap: a.gap };
+        }
         if (!spec2) continue;
         const fg = faceAt(face, t.w / 2, t.d / 2, 0); fg.position.y = y;
         windowsOn(fg, spec2);
@@ -427,41 +437,39 @@ export function buildCastle({ aniso = 8 } = {}){
 
   // ================================================================== the Daitenshu (main keep)
   const dai = new THREE.Group();
-  const daiBase = stoneBlock({ cx: 0, cz: 0, hx: 10.2, hz: 9.6, y0: GROUND, y1: 0, inset: 4.4 });
+  const daiBase = stoneBlock({ cx: 0, cz: 0, hx: 11.6, hz: 10.0, y0: GROUND, y1: 0, inset: 3.0 });
   dai.add(daiBase);
   const daiTower = tower({
     tiers: [
-      {
-        w: 17.8, d: 15.8, h: 5.0,
-        win: { 'z+': { n: 3, ww: 2.4, wh: 1.6, y: 2.6, gap: 3.1, kind: 'lattice' }, 'x-': { n: 2, ww: 2.2, wh: 1.5, y: 2.6, gap: 3.4 }, 'x+': { n: 2, ww: 2.2, wh: 1.5, y: 2.6, gap: 3.4 }, 'z-': { n: 3, ww: 2.4, wh: 1.6, y: 2.6, gap: 3.1 } },
-        awnings: { 'z+': [{ x: -5.5, y: 3.65, w: 4.4 }, { x: 0, y: 3.65, w: 4.4 }, { x: 5.5, y: 3.65, w: 4.4 }] },
-        roof: { o: 2.4, rise: 3.5, gables: [{ side: 'z+', x: -2.2, W: 7.8, rise: 2.9 }, { side: 'z-', x: 0, W: 7.8, rise: 2.9 }, { side: 'x-', x: 0, W: 6.6, rise: 2.7 }, { side: 'x+', x: 0, W: 6.6, rise: 2.7 }] },
+      { // floors 1-2: the wide black body, with a pent skirt around its foot
+        w: 21.0, d: 17.6, h: 5.8, skirt: { y: 1.7, o: 1.6, rise: 0.9 },
+        winAll: { ww: 2.3, wh: 1.5, y: 3.6, gap: 0.5 },
+        roof: { o: 2.8, rise: 3.4, gables: [{ side: 'z+', x: -3.2, W: 9.2, rise: 3.5 }, { side: 'z-', x: 0, W: 9.2, rise: 3.5 }, { side: 'x-', x: 0, W: 7.6, rise: 3.1 }, { side: 'x+', x: 0, W: 7.6, rise: 3.1 }] },
       },
-      {
-        w: 13.0, d: 11.0, h: 4.2,
-        win: { 'z+': { n: 3, ww: 2.0, wh: 1.4, y: 2.2, gap: 2.3 }, 'z-': { n: 3, ww: 2.0, wh: 1.4, y: 2.2, gap: 2.3 }, 'x-': { n: 2, ww: 2.0, wh: 1.4, y: 2.2, gap: 2.4 }, 'x+': { n: 2, ww: 2.0, wh: 1.4, y: 2.2, gap: 2.4 } },
-        awnings: { 'z+': [{ x: -3.7, y: 3.3, w: 3.4 }, { x: 3.7, y: 3.3, w: 3.4 }] },
-        roof: { o: 1.9, rise: 2.0, gables: [{ side: 'z+', x: 0, W: 5.8, rise: 2.4 }, { side: 'z-', x: 0, W: 5.8, rise: 2.4 }] },
+      { // floors 3-4, with its own small eave ring (the hisashi)
+        w: 15.2, d: 12.4, h: 4.8, eaves: { y: 2.0, o: 1.5, rise: 0.8 },
+        winAll: { ww: 2.1, wh: 1.3, y: 3.8, gap: 0.5 },
+        roof: { o: 2.5, rise: 2.8, gables: [{ side: 'z+', x: 0, W: 7.8, rise: 3.7 }, { side: 'z-', x: 0, W: 7.8, rise: 3.7 }, { side: 'x-', x: 0, W: 5.6, rise: 2.3, type: 'kara' }, { side: 'x+', x: 0, W: 5.6, rise: 2.3, type: 'kara' }] },
       },
-      {
-        w: 9.8, d: 8.2, h: 3.4,
-        win: { 'z+': { n: 2, ww: 2.0, wh: 1.3, y: 1.8, gap: 1.8 }, 'z-': { n: 2, ww: 2.0, wh: 1.3, y: 1.8, gap: 1.8 }, 'x-': { n: 2, ww: 1.8, wh: 1.3, y: 1.8, gap: 1.2 }, 'x+': { n: 2, ww: 1.8, wh: 1.3, y: 1.8, gap: 1.2 } },
-        roof: { o: 2.0, rise: 2.2, gables: [{ side: 'x-', x: 0, W: 4.6, rise: 1.9, type: 'kara' }, { side: 'x+', x: 0, W: 4.6, rise: 1.9, type: 'kara' }, { side: 'z+', x: 0, W: 4.6, rise: 1.9, type: 'kara' }, { side: 'z-', x: 0, W: 4.6, rise: 1.9, type: 'kara' }] },
+      { // floor 5
+        w: 11.2, d: 9.2, h: 3.8, eaves: { y: 1.5, o: 1.2, rise: 0.7 },
+        winAll: { ww: 2.0, wh: 1.2, y: 2.9, gap: 0.55 },
+        roof: { o: 2.2, rise: 2.3, gables: [{ side: 'z+', x: 0, W: 5.2, rise: 2.1, type: 'kara' }, { side: 'z-', x: 0, W: 5.2, rise: 2.1, type: 'kara' }, { side: 'x-', x: 0, W: 4.6, rise: 2.0 }, { side: 'x+', x: 0, W: 4.6, rise: 2.0 }] },
       },
-      {
-        w: 6.4, d: 8.0, h: 3.5,
-        win: { 'z+': { n: 3, ww: 1.4, wh: 1.7, y: 1.8, gap: 0.4 }, 'z-': { n: 3, ww: 1.4, wh: 1.7, y: 1.8, gap: 0.4 }, 'x-': { n: 4, ww: 1.4, wh: 1.7, y: 1.8, gap: 0.4 }, 'x+': { n: 4, ww: 1.4, wh: 1.7, y: 1.8, gap: 0.4 } },
+      { // floor 6: the watch floor, ringed by windows
+        w: 7.6, d: 6.6, h: 3.2,
+        winAll: { ww: 1.25, wh: 1.7, y: 1.7, gap: 0.3, edge: 0.7 },
       },
     ],
-    top: { o: 2.7, rise: 2.1, ring: [2.35, 3.2], gableRise: 2.7 },
+    top: { o: 3.0, rise: 1.9, ring: [2.6, 2.9], gableRise: 2.7 },
   });
   daiTower.position.y = 0;
   dai.add(daiTower);
 
   // entrance: a black timber gate hall with a pent roof, and a stair up to it
   {
-    const z0 = daiBase.userData.wallZ(-11.6);
-    const gate = new THREE.Group(); gate.position.set(-4.9, -12.1, z0 + 0.3);
+    const z0 = daiBase.userData.wallZ(GROUND + 2.3);
+    const gate = new THREE.Group(); gate.position.set(-4.9, GROUND + 1.8, z0 + 0.3);
     gate.add(box(5.4, 5.6, 3.0, M.wall(5.4, 5.6), 0, 2.8, -0.6));
     gate.add(box(3.5, 4.2, 0.2, M.black, 0, 2.2, 0.95));
     gate.add(box(4.1, 0.34, 0.5, M.cream, 0, 4.5, 1.0));
@@ -475,60 +483,64 @@ export function buildCastle({ aniso = 8 } = {}){
       st.receiveShadow = true; dai.add(st);
     }
     for (const sx of [-6.85, -2.95]){
-      dai.add(beam([sx, GROUND + 0.9, z0 + 3.6], [sx, -11.2, z0 + 0.1], 0.14, 0.14, M.iron));
-      for (let k = 0; k < 4; k++){ const p = k / 3; dai.add(box(0.12, 0.9, 0.12, M.iron, sx, lerp(GROUND + 0.45, -11.65, p) + 0.4, lerp(z0 + 3.6, z0 + 0.1, p))); }
+      dai.add(beam([sx, GROUND + 0.9, z0 + 3.6], [sx, GROUND + 2.7, z0 + 0.1], 0.14, 0.14, M.iron));
+      for (let k = 0; k < 4; k++){ const p = k / 3; dai.add(box(0.12, 0.9, 0.12, M.iron, sx, lerp(GROUND + 0.45, GROUND + 2.25, p) + 0.4, lerp(z0 + 3.6, z0 + 0.1, p))); }
     }
   }
   root.add(dai);
 
   // ================================================================== the connecting hall
-  const hallBase = stoneBlock({ cx: 13.4, cz: -1.8, hx: 4.4, hz: 5.0, y0: GROUND, y1: -3.5, inset: 1.8 });
+  const HX = 17.4;
+  const hallBase = stoneBlock({ cx: HX, cz: -1.8, hx: 5.0, hz: 5.2, y0: GROUND, y1: -3.5, inset: 1.8 });
   root.add(hallBase);
   {
     const hall = tower({
       tiers: [{
-        w: 13.4, d: 7.6, h: 4.0,
-        win: { 'z+': { n: 3, ww: 2.2, wh: 1.5, y: 2.1, gap: 1.6 }, 'z-': { n: 3, ww: 2.2, wh: 1.5, y: 2.1, gap: 1.6 } },
-        awnings: { 'z+': [{ x: -3.9, y: 3.15, w: 3.2 }, { x: 0, y: 3.15, w: 3.2 }, { x: 3.9, y: 3.15, w: 3.2 }] },
-        roof: { o: 1.7, rise: 2.5 },
+        w: 14.0, d: 8.0, h: 4.0,
+        winAll: { ww: 2.2, wh: 1.4, y: 2.3, gap: 0.5 },
+        roof: { o: 1.9, rise: 2.6, gables: [{ side: 'z+', x: 2.0, W: 5.0, rise: 2.0 }] },
       }],
-      ring: [3.4, 0.1],
+      ring: [3.6, 0.1],
     });
-    hall.position.set(12.6, -3.5, -1.8);
+    hall.position.set(HX, -3.5, -1.8);
     root.add(hall);
   }
 
   // ================================================================== the Shotenshu (small keep)
-  const SX = 21.8, SZ = -3.6;
-  const shoBase = stoneBlock({ cx: SX, cz: SZ, hx: 4.9, hz: 4.5, y0: GROUND, y1: -3.5, inset: 3.0 });
+  const SX = 25.6, SZ = -3.8;
+  const shoBase = stoneBlock({ cx: SX, cz: SZ, hx: 6.2, hz: 5.4, y0: GROUND, y1: -3.5, inset: 3.0 });
   root.add(shoBase);
   const sho = tower({
     tiers: [
       {
-        w: 9.6, d: 8.4, h: 4.4,
-        win: { 'z+': { n: 3, ww: 1.8, wh: 1.4, y: 2.3, gap: 1.2 }, 'x+': { n: 2, ww: 1.8, wh: 1.4, y: 2.3, gap: 1.3 }, 'x-': { n: 2, ww: 1.8, wh: 1.4, y: 2.3, gap: 1.3 }, 'z-': { n: 3, ww: 1.8, wh: 1.4, y: 2.3, gap: 1.2 } },
-        awnings: { 'z+': [{ x: -3.1, y: 3.35, w: 2.6 }, { x: 0, y: 3.35, w: 2.6 }, { x: 3.1, y: 3.35, w: 2.6 }] },
-        roof: { o: 2.0, rise: 2.5, gables: [{ side: 'z+', x: 0, W: 5.2, rise: 2.2 }, { side: 'x+', x: 0, W: 4.6, rise: 2.0, type: 'kara' }, { side: 'x-', x: 0, W: 4.6, rise: 2.0, type: 'kara' }] },
+        w: 11.4, d: 9.6, h: 3.8, skirt: { y: 1.3, o: 1.2, rise: 0.7 },
+        winAll: { ww: 2.0, wh: 1.3, y: 2.4, gap: 0.5 },
+        roof: { o: 2.2, rise: 2.4, gables: [{ side: 'z+', x: 0, W: 5.8, rise: 2.5 }, { side: 'x+', x: 0, W: 4.8, rise: 2.0, type: 'kara' }, { side: 'x-', x: 0, W: 4.8, rise: 2.0, type: 'kara' }] },
       },
       {
-        w: 6.0, d: 5.2, h: 3.4,
-        win: { 'z+': { n: 3, ww: 1.3, wh: 1.6, y: 1.8, gap: 0.3 }, 'z-': { n: 3, ww: 1.3, wh: 1.6, y: 1.8, gap: 0.3 }, 'x-': { n: 3, ww: 1.3, wh: 1.6, y: 1.8, gap: 0.3 }, 'x+': { n: 3, ww: 1.3, wh: 1.6, y: 1.8, gap: 0.3 } },
+        w: 7.8, d: 6.6, h: 3.2, eaves: { y: 1.3, o: 1.0, rise: 0.6 },
+        winAll: { ww: 1.7, wh: 1.2, y: 2.3, gap: 0.5 },
+        roof: { o: 1.9, rise: 1.8, gables: [{ side: 'z+', x: 0, W: 3.8, rise: 1.7 }] },
+      },
+      {
+        w: 5.0, d: 4.4, h: 2.8,
+        winAll: { ww: 1.0, wh: 1.4, y: 1.5, gap: 0.25, edge: 0.5 },
       },
     ],
-    top: { o: 2.2, rise: 1.7, ring: [1.9, 2.0], gableRise: 2.2 },
+    top: { o: 2.0, rise: 1.5, ring: [1.6, 1.7], gableRise: 2.0 },
   });
   sho.position.set(SX, -3.5, SZ);
   root.add(sho);
   // shinobi-gaeshi: iron spikes above the small keep's stone wall
   for (let i = 0; i < 26; i++){
-    const a = -4.4 + i * 0.34;
-    const spike = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.55, 4), M.iron); spike.position.set(SX + a, -3.2, SZ + 4.45); root.add(spike);
+    const a = -5.3 + i * 0.41;
+    const spike = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.55, 4), M.iron); spike.position.set(SX + a, -3.2, SZ + 5.2); root.add(spike);
   }
 
   // ================================================================== the wooden bridge to the right
   {
     const bridge = new THREE.Group();
-    const x0 = SX + 5.0, x1 = x0 + 24, yA = -3.5, yB = GROUND + 0.4, z = SZ + 2.2;
+    const x0 = SX + 6.0, x1 = x0 + 24, yA = -3.5, yB = GROUND + 0.4, z = SZ + 2.2;
     const len = Math.hypot(x1 - x0, yB - yA);
     const deck = box(len, 0.35, 3.4, M.wood, 0, 0, 0);
     deck.receiveShadow = true;

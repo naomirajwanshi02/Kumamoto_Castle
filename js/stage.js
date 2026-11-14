@@ -84,6 +84,7 @@ export function mountStage(container){
   }
   fit();
 
+  window.__castleView = (az, el, dist) => Object.assign(st, { az, el, dist, vAz: 0, idle: -9999 });
   const clock = () => {
     S.raf = requestAnimationFrame(clock);
     const now = performance.now(), dt = Math.min(0.05, (now - S.last) / 1000); S.last = now;
