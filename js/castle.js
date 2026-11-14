@@ -2,8 +2,8 @@
 //  - the Daitenshu (main keep): a curved "musha-gaeshi" stone base, then black-board (shitami-ita)
 //    walls in tiers, each with a tiled roof, white-plaster gables (chidori-hafu and kara-hafu)
 //    and a top floor ringed by windows under a hip-and-gable (irimoya) roof with shachihoko
-//  - the Shotenshu (small keep) to its right, joined by a low connecting hall
-//  - the entrance stair and the wooden bridge to the right
+//  - the Shotenshu (small keep) to its right, joined by a connecting building over the gate
+//  - the side entrance stair, and the bridge that runs straight into the gate between the bases
 // Everything is drawn from procedural canvas textures, so there are no image files to load.
 
 import * as THREE from 'three';
@@ -28,20 +28,28 @@ function canvasTex(w, h, draw, { srgb = true, aniso = 8 } = {}){
 // ------------------------------------------------------------------ textures
 function makeTextures(aniso){
   const R = rng(7);
+  // grey fitted stone blocks laid in rough courses, like the real walls (uchikomi-hagi)
   const stone = canvasTex(1024, 1024, (g, w, h) => {
-    g.fillStyle = '#3c3831'; g.fillRect(0, 0, w, h);
-    for (let n = 0; n < 1500; n++){
-      const cx = R() * w, cy = R() * h, rx = 20 + R() * 34, ry = 15 + R() * 22, a = (R() - 0.5) * 0.7;
-      const s = 112 + R() * 70, warm = R() * 18;
-      const col = `rgb(${s + warm | 0},${s + warm * 0.55 | 0},${s - 10 - warm * 0.8 | 0})`;
-      for (const dx of [-w, 0, w]) for (const dy of [-h, 0, h]){
-        if (cx + dx < -80 || cx + dx > w + 80 || cy + dy < -80 || cy + dy > h + 80) continue;
-        g.beginPath(); g.ellipse(cx + dx, cy + dy, rx, ry, a, 0, 6.2832);
-        const gr = g.createRadialGradient(cx + dx - rx * 0.25, cy + dy - ry * 0.3, 2, cx + dx, cy + dy, rx);
-        gr.addColorStop(0, col); gr.addColorStop(1, `rgb(${s * 0.72 | 0},${s * 0.7 | 0},${s * 0.64 | 0})`);
-        g.fillStyle = gr; g.fill();
-        g.lineWidth = 2.4; g.strokeStyle = 'rgba(26,22,18,.75)'; g.stroke();
+    g.fillStyle = '#2f2e2c'; g.fillRect(0, 0, w, h);
+    let y = 0;
+    while (y < h){
+      const rh = 46 + R() * 34;
+      let x = -R() * 80;
+      while (x < w){
+        const bw = 70 + R() * 90;
+        const s = 118 + R() * 62, cool = R() * 8;
+        const x0 = x + 3, y0 = y + 3, ww = bw - 6, hh = Math.min(rh, h - y) - 6, r = 10;
+        for (const dx of [0, w]){
+          const gr = g.createLinearGradient(0, y0, 0, y0 + hh);
+          gr.addColorStop(0, `rgb(${s + 14 | 0},${s + 13 | 0},${s + 10 + cool | 0})`);
+          gr.addColorStop(1, `rgb(${s * 0.78 | 0},${s * 0.77 | 0},${s * 0.76 + cool | 0})`);
+          g.fillStyle = gr;
+          g.beginPath(); g.roundRect ? g.roundRect(x0 + dx, y0, ww, hh, r) : g.rect(x0 + dx, y0, ww, hh); g.fill();
+          for (let k = 0; k < 14; k++){ g.fillStyle = `rgba(${R() < 0.5 ? '255,255,255' : '20,20,20'},.06)`; g.fillRect(x0 + dx + R() * ww, y0 + R() * hh, 6 + R() * 18, 3 + R() * 6); }
+        }
+        x += bw;
       }
+      y += rh;
     }
   }, { aniso });
 
@@ -195,7 +203,7 @@ export function buildCastle({ aniso = 8 } = {}){
           const bulge = Math.sin(s * Math.PI) * 0.18 * (i / N);
           const nrm = [b[2] - a[2], 0, -(b[0] - a[0])]; const nl = Math.hypot(nrm[0], nrm[2]) || 1;
           pos.push(lerp(a[0], b[0], s) + nrm[0] / nl * bulge * -1, lerp(a[1], b[1], s), lerp(a[2], b[2], s) + nrm[2] / nl * bulge * -1);
-          uv.push(s * len / 6, acc / 6);
+          uv.push(s * len / 11, acc / 11);
         }
       }
       for (let i = 0; i < N; i++) for (let j = 0; j < Mx; j++){
@@ -449,7 +457,7 @@ export function buildCastle({ aniso = 8 } = {}){
 
   // ================================================================== the Daitenshu (main keep)
   const dai = new THREE.Group();
-  const daiBase = stoneBlock({ cx: 0, cz: 0, hx: 10.9, hz: 9.2, y0: GROUND, y1: 0, inset: 3.2 });
+  const daiBase = stoneBlock({ cx: 0, cz: 0, hx: 10.2, hz: 8.4, y0: GROUND, y1: 0, inset: 3.2 });
   dai.add(daiBase);
   const daiTower = tower({
     tiers: [
@@ -499,83 +507,92 @@ export function buildCastle({ aniso = 8 } = {}){
       for (let k = 0; k < 4; k++){ const p = k / 3; dai.add(box(0.12, 0.9, 0.12, M.iron, sx, lerp(GROUND + 0.45, GROUND + 2.25, p) + 0.4, lerp(z0 + 3.6, z0 + 0.1, p))); }
     }
   }
+  // ishi-otoshi: the first floor overhangs its stone base on a row of white corbels
+  for (const face of ['z+', 'z-', 'x+', 'x-']){
+    const len = face[0] === 'z' ? 21.0 : 17.6;
+    const fg = faceAt(face, 10.5, 8.8, 0);
+    fg.add(box(len + 0.2, 0.32, 0.9, M.cream, 0, -0.16, -0.25));
+    const n = Math.floor(len / 1.5);
+    for (let i = 0; i <= n; i++) fg.add(box(0.34, 0.75, 0.7, M.cream, -len / 2 + 0.6 + i * (len - 1.2) / n, -0.62, -0.2));
+    dai.add(fg);
+  }
   root.add(dai);
 
-  // ================================================================== the connecting hall
-  const HX = 17.4;
-  const hallBase = stoneBlock({ cx: HX, cz: -1.8, hx: 5.0, hz: 5.2, y0: GROUND, y1: -3.5, inset: 1.8 });
+  // ================================================================== the connecting building, and the gate between the two bases
+  const SX = 27.2, SZ = 0;
+  const GX = 15.9; // the gate sits in the recess between the main keep's base and the small keep's base
+  const hallBase = stoneBlock({ cx: GX, cz: -3.0, hx: 4.8, hz: 4.4, y0: GROUND, y1: -1.0, inset: 1.5 });
   root.add(hallBase);
+  const sill = GROUND + 4.0;
+  const gz = hallBase.userData.wallZ(sill + 2);
   {
     const hall = tower({
-      tiers: [{
-        w: 14.0, d: 8.0, h: 4.0,
-        winAll: { ww: 2.2, wh: 1.4, y: 2.3, gap: 0.5 },
-        roof: { o: 1.9, rise: 2.6, gables: [{ side: 'z+', x: 2.0, W: 5.0, rise: 2.0 }] },
-      }],
-      ring: [3.6, 0.1],
+      tiers: [{ w: 11.6, d: 11.0, h: 5.4, winAll: { ww: 2.0, wh: 1.3, y: 2.6, gap: 0.5 } }],
+      top: { o: 2.0, rise: 1.8, ring: [2.4, 3.4], gableRise: 2.8 },
     });
-    hall.position.set(HX, -3.5, -1.8);
+    hall.position.set(GX, -1.0, -1.6);
     root.add(hall);
+
+    // the gate: timber frame, wooden doors, the white curtain with crests, a lintel
+    const gate = new THREE.Group(); gate.position.set(GX, sill, gz);
+    gate.add(box(4.6, 4.4, 1.4, M.black, 0, 2.2, -0.3));
+    gate.add(box(3.6, 3.5, 0.2, M.wood, 0, 1.75, 0.45));
+    gate.add(box(0.08, 3.5, 0.25, M.black, 0, 1.75, 0.5));
+    gate.add(box(3.8, 0.95, 0.12, M.cream, 0, 3.3, 0.6));
+    for (const x of [-1.1, 1.1]){ const c = new THREE.Mesh(new THREE.CircleGeometry(0.3, 16), M.black); c.position.set(x, 3.3, 0.67); gate.add(c); }
+    gate.add(box(5.0, 0.38, 1.8, M.cream, 0, 4.55, -0.1));
+    root.add(gate);
+    root.add(box(4.4, 0.35, 1.8, M.cap, GX, sill - 0.17, gz + 0.7));
+
+    // the bridge runs straight into the gate, down to the ground in front
+    const z0 = gz + 1.5, z1 = z0 + 22, yA = sill, yB = GROUND + 0.35;
+    const len = Math.hypot(z1 - z0, yA - yB), ang = Math.atan2(yA - yB, z1 - z0);
+    const holder = new THREE.Group();
+    const deck = box(3.4, 0.35, len, M.wood); deck.receiveShadow = true; holder.add(deck);
+    for (const sx of [-1, 1]){
+      holder.add(box(0.14, 0.1, len, M.iron, sx * 1.62, 1.1, 0));
+      holder.add(box(0.14, 0.1, len, M.iron, sx * 1.62, 0.6, 0));
+      for (let i = 0; i <= Math.floor(len / 2); i++) holder.add(box(0.12, 1.15, 0.12, M.iron, sx * 1.62, 0.55, -len / 2 + i * len / Math.floor(len / 2)));
+    }
+    holder.rotation.x = ang; holder.position.set(GX, (yA + yB) / 2 - 0.15, (z0 + z1) / 2);
+    root.add(holder);
+    for (const t of [0.2, 0.45, 0.7]){
+      const pz = lerp(z0, z1, t), py = lerp(yA, yB, t);
+      root.add(box(3.0, py - GROUND, 0.6, M.stone, GX, (py + GROUND) / 2 - 0.3, pz));
+    }
   }
 
   // ================================================================== the Shotenshu (small keep)
-  const SX = 25.6, SZ = -3.8;
-  const shoBase = stoneBlock({ cx: SX, cz: SZ, hx: 6.2, hz: 5.4, y0: GROUND, y1: -3.5, inset: 3.0 });
+  const shoBase = stoneBlock({ cx: SX, cz: SZ, hx: 6.6, hz: 5.8, y0: GROUND, y1: -3.0, inset: 3.0 });
   root.add(shoBase);
   const sho = tower({
     tiers: [
       {
-        w: 11.4, d: 9.6, h: 3.8, skirt: { y: 1.3, o: 1.2, rise: 0.7 },
-        winAll: { ww: 2.0, wh: 1.3, y: 2.4, gap: 0.5 },
-        roof: { o: 2.2, rise: 2.4, gables: [{ side: 'z+', x: 0, W: 5.8, rise: 2.5 }, { side: 'x+', x: 0, W: 4.8, rise: 2.0, type: 'kara' }, { side: 'x-', x: 0, W: 4.8, rise: 2.0, type: 'kara' }] },
+        w: 13.0, d: 11.4, h: 6.4, skirt: { y: 2.2, o: 1.4, rise: 0.8 },
+        winAll: { ww: 2.1, wh: 1.2, y: 3.7, gap: 0.5 },
+        roof: { o: 2.1, rise: 2.2, gables: [{ side: 'z+', x: 0, W: 6.4, rise: 2.4, type: 'kara' }, { side: 'x+', x: 0, W: 6.0, rise: 2.6 }, { side: 'x-', x: 0, W: 6.0, rise: 2.6 }] },
       },
       {
-        w: 7.8, d: 6.6, h: 3.2, eaves: { y: 1.3, o: 1.0, rise: 0.6 },
-        winAll: { ww: 1.7, wh: 1.2, y: 2.3, gap: 0.5 },
-        roof: { o: 1.9, rise: 1.8, gables: [{ side: 'z+', x: 0, W: 3.8, rise: 1.7 }] },
+        w: 9.4, d: 8.0, h: 4.6, eaves: { y: 2.4, o: 1.1, rise: 0.6 },
+        winAll: { ww: 1.9, wh: 1.2, y: 1.4, gap: 0.5 },
+        roof: { o: 1.8, rise: 1.6, gables: [{ side: 'z+', x: 0, W: 4.2, rise: 2.0 }] },
       },
       {
-        w: 5.0, d: 4.4, h: 2.8, band: 0.4,
-        winAll: { ww: 1.0, wh: 1.4, y: 1.5, gap: 0.25, edge: 0.5, light: true },
+        w: 7.0, d: 6.0, h: 3.4, band: 0.5,
+        winAll: { ww: 1.2, wh: 1.6, y: 1.7, gap: 0.3, edge: 0.6, light: true },
       },
     ],
-    top: { o: 2.0, rise: 1.5, ring: [1.6, 1.7], gableRise: 2.0 },
+    top: { o: 2.1, rise: 1.6, ring: [2.2, 2.4], gableRise: 2.5 },
   });
-  sho.position.set(SX, -3.5, SZ);
+  sho.position.set(SX, -3.0, SZ);
   root.add(sho);
   // shinobi-gaeshi: iron spikes above the small keep's stone wall
   for (let i = 0; i < 26; i++){
-    const a = -5.3 + i * 0.41;
-    const spike = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.55, 4), M.iron); spike.position.set(SX + a, -3.2, SZ + 5.2); root.add(spike);
+    const spike = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.55, 4), M.iron); spike.position.set(SX - 6.2 + i * 0.48, -2.7, SZ + 6.0); root.add(spike);
   }
-
-  // ================================================================== the wooden bridge to the right
-  {
-    const bridge = new THREE.Group();
-    const x0 = SX + 6.0, x1 = x0 + 24, yA = -3.5, yB = GROUND + 0.4, z = SZ + 2.2;
-    const len = Math.hypot(x1 - x0, yB - yA);
-    const deck = box(len, 0.35, 3.4, M.wood, 0, 0, 0);
-    deck.receiveShadow = true;
-    const ang = Math.atan2(yB - yA, x1 - x0);
-    const holder = new THREE.Group(); holder.add(deck);
-    for (const sz of [-1, 1]){
-      holder.add(box(len, 0.1, 0.14, M.iron, 0, 1.1, sz * 1.62));
-      holder.add(box(len, 0.1, 0.14, M.iron, 0, 0.6, sz * 1.62));
-      for (let i = 0; i <= Math.floor(len / 2); i++) holder.add(box(0.12, 1.15, 0.12, M.iron, -len / 2 + i * 2, 0.55, sz * 1.62));
-    }
-    holder.rotation.z = ang; holder.position.set((x0 + x1) / 2, (yA + yB) / 2 - 0.2, z);
-    bridge.add(holder);
-    for (const t of [0.15, 0.4, 0.65, 0.9]){
-      const px = lerp(x0, x1, t), py = lerp(yA, yB, t);
-      const pier = box(0.5, py - GROUND, 3.0, M.stone, px, (py + GROUND) / 2 - 0.3, z); pier.material = M.stone;
-      bridge.add(pier);
-    }
-    root.add(bridge);
-  }
-
 
   root.traverse((o) => { if (o.isMesh && !o.userData.noShadow){ o.castShadow = o.castShadow || false; } });
-  root.userData.center = new THREE.Vector3(18, 2, 0);
+  root.userData.center = new THREE.Vector3(12, 2, 2);
   root.userData.GROUND = GROUND;
   return root;
 }
