@@ -37,7 +37,7 @@ function makeTextures(aniso){
       let x = -R() * 80;
       while (x < w){
         const bw = 70 + R() * 90;
-        const s = 118 + R() * 62, cool = R() * 8;
+        const s = 96 + R() * 54, cool = R() * 8;
         const x0 = x + 3, y0 = y + 3, ww = bw - 6, hh = Math.min(rh, h - y) - 6, r = 10;
         for (const dx of [0, w]){
           const gr = g.createLinearGradient(0, y0, 0, y0 + hh);
@@ -84,32 +84,36 @@ function makeTextures(aniso){
     for (let y = 0; y < h; y += 8){ g.fillStyle = '#4a443d'; g.fillRect(0, y, w, 3); g.fillStyle = '#0d0c0b'; g.fillRect(0, y + 5, w, 3); }
   }, { aniso });
 
+  // light-grey kawara roof tiles with white lime-mortar seams, as on the rebuilt keeps
   const tile = canvasTex(512, 512, (g, w, h) => {
-    g.fillStyle = '#9a948a'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#e4e0d6'; g.fillRect(0, 0, w, h);
     for (let row = 0; row < 8; row++){
       const y = row * 64;
-      for (let x = 0; x < w; x += 51.2){
-        const v = 118 + R() * 26;
-        g.fillStyle = `rgb(${v},${v - 4},${v - 10})`; g.fillRect(x + 4, y + 3, 44, 56);
-        g.fillStyle = 'rgba(255,255,255,.14)'; g.fillRect(x + 4, y + 3, 5, 56);
-        g.fillStyle = 'rgba(25,22,20,.55)'; g.fillRect(x + 42, y + 3, 6, 56);
+      for (let x = 0; x < w; x += 42.67){
+        const v = 150 + R() * 22;
+        const gr = g.createLinearGradient(x, 0, x + 42, 0);
+        gr.addColorStop(0, `rgb(${v - 26},${v - 28},${v - 30})`); gr.addColorStop(0.45, `rgb(${v + 14},${v + 12},${v + 8})`); gr.addColorStop(1, `rgb(${v - 30},${v - 32},${v - 34})`);
+        g.fillStyle = gr; g.fillRect(x + 3, y + 3, 37, 52);
       }
-      g.fillStyle = 'rgba(70,64,58,.55)'; g.fillRect(0, y + 58, w, 3); g.fillStyle = 'rgba(232,226,212,.75)'; g.fillRect(0, y + 61, w, 3);
+      g.fillStyle = '#f2efe6'; g.fillRect(0, y + 57, w, 7);
+      g.fillStyle = 'rgba(60,56,50,.5)'; g.fillRect(0, y + 55, w, 2);
     }
   }, { aniso });
 
+  // gable face: white lime plaster, a small hexagonal vent under the apex and a carved scroll below it
   const gable = canvasTex(512, 512, (g, w, h) => {
-    g.fillStyle = '#eee6d2'; g.fillRect(0, 0, w, h);
-    g.fillStyle = 'rgba(120,100,70,.08)';
-    for (let i = 0; i < 200; i++) g.fillRect(R() * w, R() * h, 20, 2);
-    g.fillStyle = '#2a2420'; g.fillRect(0, h - 26, w, 26);
-    g.fillStyle = '#17130f'; g.beginPath(); g.moveTo(w * 0.5, h * 0.46); g.lineTo(w * 0.1, h * 0.96); g.lineTo(w * 0.9, h * 0.96); g.closePath(); g.fill();
-    g.fillStyle = '#2a2420';
-    g.strokeStyle = '#2a2420'; g.lineWidth = 10;
-    g.beginPath(); g.arc(w / 2, h * 0.3, 34, 0, 6.2832); g.stroke();
-    g.fillStyle = '#b5452f'; g.beginPath(); g.arc(w / 2, h * 0.3, 15, 0, 6.2832); g.fill();
-    g.strokeStyle = '#2a2420'; g.lineWidth = 6;
-    for (let k = 0; k < 8; k++){ const a = k * Math.PI / 4; g.beginPath(); g.moveTo(w / 2 + Math.cos(a) * 40, h * 0.3 + Math.sin(a) * 40); g.lineTo(w / 2 + Math.cos(a) * 54, h * 0.3 + Math.sin(a) * 54); g.stroke(); }
+    g.fillStyle = '#f1ece0'; g.fillRect(0, 0, w, h);
+    g.fillStyle = 'rgba(120,110,95,.07)';
+    for (let i = 0; i < 160; i++) g.fillRect(R() * w, R() * h, 24, 2);
+    g.fillStyle = '#6f6b64'; g.beginPath();
+    for (let k = 0; k < 6; k++){ const a = k * Math.PI / 3 + Math.PI / 6; g.lineTo(w / 2 + Math.cos(a) * 24, h * 0.34 + Math.sin(a) * 24); }
+    g.closePath(); g.fill();
+    g.strokeStyle = '#c9c1ae'; g.lineWidth = 7; g.lineCap = 'round';
+    for (const s of [-1, 1]){
+      g.beginPath(); g.moveTo(w / 2, h * 0.52); g.bezierCurveTo(w / 2 + s * 40, h * 0.5, w / 2 + s * 62, h * 0.6, w / 2 + s * 44, h * 0.68); g.bezierCurveTo(w / 2 + s * 30, h * 0.74, w / 2 + s * 12, h * 0.68, w / 2 + s * 20, h * 0.62); g.stroke();
+    }
+    g.fillStyle = '#d6cfbd'; g.beginPath(); g.arc(w / 2, h * 0.54, 13, 0, 6.2832); g.fill();
+    g.fillStyle = '#3a3733'; g.fillRect(0, h - 22, w, 22);
   }, { aniso });
 
   const sand = canvasTex(512, 512, (g, w, h) => {
@@ -168,6 +172,8 @@ export function buildCastle({ aniso = 8 } = {}){
     gold: new THREE.MeshStandardMaterial({ color: 0xb59a52, roughness: 0.4, metalness: 0.55 }),
     iron: new THREE.MeshStandardMaterial({ color: 0x3b3a39, roughness: 0.6, metalness: 0.5 }),
     gableFace: new THREE.MeshStandardMaterial({ map: T.gable, roughness: 0.9 }),
+    eaveTile: new THREE.MeshStandardMaterial({ color: 0xa9a49a, roughness: 0.85, side: THREE.DoubleSide }),
+    ridge: new THREE.MeshStandardMaterial({ color: 0xe6dfcd, roughness: 0.85 }),
     awn: new THREE.MeshStandardMaterial({ color: 0x3b3835, roughness: 0.7 }),
     frameD: new THREE.MeshStandardMaterial({ color: 0x0e0c0b, roughness: 0.9 }),
     winDark: (cols, rows) => new THREE.MeshStandardMaterial({ map: repeated(T.latticeD, cols / 8, rows / 4), roughness: 0.5 }),
@@ -278,13 +284,36 @@ export function buildCastle({ aniso = 8 } = {}){
     fg.setIndex(fidx); fg.computeVertexNormals();
     const fm = new THREE.Mesh(fg, new THREE.MeshStandardMaterial({ color: 0xece3cf, roughness: 0.85, side: THREE.DoubleSide }));
     g.add(fm);
-    // soffit under the eave
-    const soff = box(ex * 2, 0.25, ez * 2, M.wood, 0, y0 - 0.1, 0); g.add(soff);
-    // hip ridges
-    const hipTop = y0 + h;
+    fm.userData.noCast = true; fm.userData.noRecv = true;
+    // the row of decorated eave tiles (nokigawara) along the lower edge, and the soffit under it
+    {
+      const epos = [], eidx = [];
+      for (const [A, B] of sides){
+        const len = Math.hypot(B[0] - A[0], B[1] - A[1]);
+        const nx = -(B[1] - A[1]) / len * 0.16, nz = (B[0] - A[0]) / len * 0.16;
+        const eb = epos.length / 3;
+        for (let j = 0; j <= Mx; j++){
+          const s = j / Mx, x = lerp(A[0], B[0], s) + nx, z = lerp(A[1], B[1], s) + nz;
+          const top = y0 + lift * Math.pow(Math.abs(2 * s - 1), 3);
+          epos.push(x, top + 0.02, z, x, top + 0.34, z);
+        }
+        for (let j = 0; j < Mx; j++){ const a = eb + j * 2; eidx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3); }
+      }
+      const eg = new THREE.BufferGeometry();
+      eg.setAttribute('position', new THREE.Float32BufferAttribute(epos, 3)); eg.setIndex(eidx); eg.computeVertexNormals();
+      const em = new THREE.Mesh(eg, M.eaveTile); em.userData.noCast = true; em.userData.noRecv = true; g.add(em);
+    }
+    g.add(box(ex * 2 - 0.3, 0.2, ez * 2 - 0.3, M.wood, 0, y0 - 0.2, 0));
+    // hip ridges follow the curve of the roof surface, ending in a decorated ridge-end tile
     for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]){
-      const hp = [sx * ex, y0 + lift, sz * ez], tp = [sx * Math.max(tx, 0.001), hipTop, sz * Math.max(tz, 0.001)];
-      g.add(beam(hp, [lerp(hp[0], tp[0], 1), lerp(hp[1], tp[1], 1) + 0.05, lerp(hp[2], tp[2], 1)], 0.26, 0.22, M.creamD));
+      let prev = null;
+      for (let k = 0; k <= 8; k++){
+        const t = k / 8;
+        const p = [sx * lerp(ex, Math.max(tx, 0.001), t), y0 + h * Math.pow(t, pow) + lift * (1 - t) + 0.13, sz * lerp(ez, Math.max(tz, 0.001), t)];
+        if (prev) g.add(beam(prev, p, 0.3, 0.2, M.ridge));
+        prev = p;
+      }
+      const end = box(0.55, 0.55, 0.55, M.ridge, sx * ex, y0 + lift + 0.22, sz * ez); end.userData.noRecv = true; g.add(end);
     }
     return g;
   }
@@ -338,10 +367,11 @@ export function buildCastle({ aniso = 8 } = {}){
     for (let k = 0; k < rp.length - 1; k++){
       const bar = beam([rp[k][0], rp[k][1], 0.45], [rp[k + 1][0], rp[k + 1][1], 0.45], 0.5, 0.62, M.cream);
       bar.castShadow = true; g.add(bar);
+      const cap = beam([rp[k][0], rp[k][1] + 0.4, 0.4], [rp[k + 1][0], rp[k + 1][1] + 0.4, 0.4], 0.95, 0.22, M.eaveTile); cap.userData.noRecv = true; g.add(cap);
     }
     // gegyo plate under the apex, base beam
     const apex = rp[Math.floor(rp.length / 2)];
-    g.add(box(1.0, 1.05, 0.22, M.cream, 0, apex[1] - 0.95, 0.5));
+    g.add(box(1.5, 1.2, 0.22, M.cream, 0, apex[1] - 1.05, 0.52));
     g.add(box(W + 0.4, 0.34, 0.3, M.dark, 0, 0.16, 0.2));
     return g;
   }
@@ -355,7 +385,7 @@ export function buildCastle({ aniso = 8 } = {}){
       const x = -total / 2 + ww / 2 + i * (ww + gap);
       g.add(box(ww + 0.22, wh + 0.22, 0.1, light ? M.creamD : M.frameD, x, y, 0.04));
       const pane = new THREE.Mesh(new THREE.PlaneGeometry(ww, wh), light ? M.win(Math.round(ww * 1.6), Math.round(wh * 1.6)) : M.winDark(Math.round(ww * 1.2), Math.round(wh * 1.2)));
-      pane.position.set(x, y, 0.1); g.add(pane);
+      pane.position.set(x, y, 0.1); pane.userData.noCast = true; g.add(pane);
     }
     if (awn) awning(g, { x: 0, y: y + wh / 2 + 0.42, w: total + 1.2, d: 1.0, h: 0.55, mat: M.awn });
   }
@@ -378,7 +408,7 @@ export function buildCastle({ aniso = 8 } = {}){
       const body = new THREE.Mesh(new THREE.BoxGeometry(t.w, t.h, t.d), wallMats);
       body.position.y = y + t.h / 2; body.castShadow = body.receiveShadow = true; g.add(body);
       // plaster plinth at the foot and a plaster band under the eaves
-      const band = t.band ?? 1.7;
+      const band = t.band ?? 1.3;
       if (band > 0) g.add(box(t.w + 0.14, band, t.d + 0.14, M.cream, 0, y + t.h - band / 2, 0));
       // pent skirt around the foot / small eave ring part-way up (the hisashi)
       for (const sk of [t.skirt, t.eaves]){

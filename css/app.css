@@ -71,7 +71,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 #found.on{animation:fadeout 1.3s ease forwards}
 .badge{padding:18px 30px;text-align:center;display:flex;flex-direction:column;gap:2px;animation:pop .45s var(--anatomy-ease)}
 .badge .stamp{width:64px;height:64px;margin:0 auto 6px;border:4px solid var(--anatomy-red);border-radius:50%;color:var(--anatomy-red);
-  font:900 34px/56px 'Zen Maru Gothic','Yu Gothic',sans-serif;transform:rotate(-10deg)}
+  font:900 34px/56px 'Zen Maru Gothic',sans-serif;transform:rotate(-10deg)}
 .badge b{font-size:24px;color:var(--anatomy-strong)}
 .badge span{font-size:16px}
 @keyframes fadeout{0%,75%{opacity:1}100%{opacity:0}}

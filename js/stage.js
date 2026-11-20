@@ -24,7 +24,7 @@ export function mountStage(container){
   container.appendChild(cv);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(36, 1, 1, 900);
+  const camera = new THREE.PerspectiveCamera(36, 1, 8, 700);
 
   scene.add(new THREE.HemisphereLight(0xfff3dd, 0x6b5a45, 1.15));
   const sun = new THREE.DirectionalLight(0xffecc8, 2.4);
@@ -32,13 +32,13 @@ export function mountStage(container){
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   const sc = sun.shadow.camera; sc.left = -62; sc.right = 62; sc.top = 62; sc.bottom = -62; sc.near = 10; sc.far = 260;
-  sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.35;
+  sun.shadow.bias = -0.0009; sun.shadow.normalBias = 0.6;
   sun.target.position.set(18, -4, 0);
   scene.add(sun, sun.target);
   const fill = new THREE.DirectionalLight(0xbcd0e8, 0.55); fill.position.set(-60, 30, -40); scene.add(fill);
 
   const castle = buildCastle({ aniso: Math.min(8, renderer.capabilities.getMaxAnisotropy()) });
-  castle.traverse((o) => { if (o.isMesh){ o.castShadow = true; o.receiveShadow = true; } });
+  castle.traverse((o) => { if (o.isMesh){ o.castShadow = !o.userData.noCast; o.receiveShadow = !o.userData.noRecv; } });
   scene.add(castle);
   const target = castle.userData.center.clone();
 

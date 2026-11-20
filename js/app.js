@@ -1,4 +1,4 @@
-// Kumamoto Castle in AR: allow the camera → scan the castle picture → how-to panel →
+// Kumamoto Castle in AR: allow the camera, scan the castle picture → how-to panel →
 // the 3D castle floats over the live camera. Turn it, zoom it, read the notes at the top.
 //
 // ?demo=1     skip the picture (camera still on as the background)
@@ -112,7 +112,7 @@ function buildNotes(){
   if ($('noteTrack').children.length) return;
   $('noteTrack').innerHTML = NOTES.map((n, i) => `
     <article class="note" id="note${i}" aria-roledescription="slide" aria-label="${i + 1} of ${NOTES.length}">
-      <h2>${n.title} <small>${n.jp}</small></h2>
+      <h2>${n.title}</h2>
       <p>${n.text}</p>
     </article>`).join('');
   $('noteDots').innerHTML = NOTES.map((n, i) => `<button role="tab" aria-label="${n.title}" data-i="${i}"></button>`).join('');
